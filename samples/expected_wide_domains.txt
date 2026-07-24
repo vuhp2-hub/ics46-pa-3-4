@@ -1,0 +1,79 @@
+courses: 4   candidate meals: 8
+
+Added 8 of 8 meals.
+After adds (size 8):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 0   score=0
+    0 1 3 1   score=192
+
+setCourse(0, 0) returned true  (drops meals that pick a different dish for course 0)
+After setCourse (size 8):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 0   score=0
+    0 1 3 1   score=192
+
+removeLowest(2):
+After removeLowest (size 6):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 1   score=192
+After undo #1 (reverses remove-lowest) (size 8):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 0   score=0
+    0 1 3 1   score=192
+After undo #2 (reverses set-course) (size 8):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 0   score=0
+    0 1 3 1   score=192
+featured meals (one lap) (size 8):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 0   score=0
+    0 1 3 1   score=192
+After undo #3 (reverses an add-meal -- that meal is destroyed) (size 7):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 0   score=0
+
+applyRequests(8 adds, setCourse(0, 0), removeLowest(1)):   undo depth 10
+After applyRequests (size 7):
+    0 1 0 0   score=24
+    0 1 0 1   score=96
+    0 1 0 2   score=12
+    0 1 1 0   score=384
+    0 1 2 1   score=30
+    0 1 2 2   score=54
+    0 1 3 1   score=192
+
+meals copied during setCourse/removeLowest/undo: 0   (0 = you moved nodes, as intended)

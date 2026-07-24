@@ -1,0 +1,24 @@
+courses: 2   candidate meals: 1
+
+Added 1 of 1 meals.
+After adds (size 1):
+    1 0   score=1
+
+setCourse(0, 1) returned true  (drops meals that pick a different dish for course 0)
+After setCourse (size 1):
+    1 0   score=1
+
+removeLowest(1):
+After removeLowest (size 0):
+After undo #1 (reverses remove-lowest) (size 1):
+    1 0   score=1
+After undo #2 (reverses set-course) (size 1):
+    1 0   score=1
+featured meals (one lap) (size 1):
+    1 0   score=1
+After undo #3 (reverses an add-meal -- that meal is destroyed) (size 0):
+
+applyRequests(1 adds, setCourse(0, 1), removeLowest(1)):   undo depth 3
+After applyRequests (size 0):
+
+meals copied during setCourse/removeLowest/undo: 0   (0 = you moved nodes, as intended)

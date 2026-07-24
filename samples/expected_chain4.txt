@@ -1,0 +1,79 @@
+courses: 4   candidate meals: 8
+
+Added 8 of 8 meals.
+After adds (size 8):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 0   score=1440
+    0 2 1 1   score=7680
+
+setCourse(0, 0) returned true  (drops meals that pick a different dish for course 0)
+After setCourse (size 8):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 0   score=1440
+    0 2 1 1   score=7680
+
+removeLowest(2):
+After removeLowest (size 6):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+After undo #1 (reverses remove-lowest) (size 8):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 0   score=1440
+    0 2 1 1   score=7680
+After undo #2 (reverses set-course) (size 8):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 0   score=1440
+    0 2 1 1   score=7680
+featured meals (one lap) (size 8):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 0   score=1440
+    0 2 1 1   score=7680
+After undo #3 (reverses an add-meal -- that meal is destroyed) (size 7):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 0   score=1440
+
+applyRequests(8 adds, setCourse(0, 0), removeLowest(1)):   undo depth 10
+After applyRequests (size 7):
+    0 0 1 0   score=12288
+    0 0 1 1   score=65536
+    0 0 1 2   score=24576
+    0 1 1 0   score=7776
+    0 1 1 1   score=41472
+    0 1 1 2   score=15552
+    0 2 1 1   score=7680
+
+meals copied during setCourse/removeLowest/undo: 0   (0 = you moved nodes, as intended)
