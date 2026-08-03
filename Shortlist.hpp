@@ -49,13 +49,13 @@ class Shortlist {
     class Record {
       private:
         Request req;
-        SinglyLinkedList<Meal> *set_aside;
+        SinglyLinkedList<Meal> set_aside;
         void unadd() {}
         void unset() {}
         void putBackKLowest() {}
 
       public:
-        Record(const Request &req, SinglyLinkedList<Meal> *set_aside)
+        Record(const Request &req, SinglyLinkedList<Meal> &set_aside)
             : req{req}, set_aside{set_aside} {}
         void reverse() {
             if (req.kind == Request::Kind::AddMeal) {
@@ -78,7 +78,7 @@ class Shortlist {
         int idx;
         int dish;
     };
-    SinglyLinkedList<SettedCourse> *coursesSet = nullptr;
+    SinglyLinkedList<SettedCourse> coursesSet;
 
   public:
     Shortlist() = default;
@@ -86,7 +86,9 @@ class Shortlist {
     // TODO: free everything you still own here -- pending set-aside storage,
     // plus any bookkeeping you
     //       allocated (only needed if it lives on the heap).
-    ~Shortlist() { /* TODO */ }
+    ~Shortlist() {
+        // coursesSet should be freed with its own destructor
+    }
 
     // ---- read-only view of the active shortlist (used by the driver +
     // autograder) -- PROVIDED, keep as-is ----
