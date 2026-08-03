@@ -50,19 +50,29 @@ class Shortlist {
       private:
         Request::Kind reqKind;
         SinglyLinkedList<Meal> set_aside;
-        void unadd() {}
+        const Meal *meal;
+        void unadd(CircularSinglyLinkedList<Meal> &shortlist) {
+            auto shortlist_cursor = shortlist.begin_cursor();
+            for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
+                if (*shortlist_cursor == *meal) {
+                    SinglyLinkedNode<Meal> *result =
+                        shortlist.detachAt(shortlist_cursor);
+                    delete result;
+                }
+            }
+        }
+
         void unset() {}
         void putBackKLowest() {}
 
       public:
-        Record(const Request::Kind reqKind, Meal meal) {
-            set_aside.append(meal);
-        }
+        Record(const Request::Kind reqKind, const Meal &meal)
+            : reqKind(reqKind), meal(&meal) {}
         Record(const Request::Kind reqKind, SinglyLinkedList<Meal> &set_aside)
             : reqKind{reqKind}, set_aside{set_aside} {}
-        void reverse() {
+        void reverse(CircularSinglyLinkedList<Meal> &shortlist) {
             if (reqKind == Request::Kind::AddMeal) {
-                unadd();
+                unadd(shortlist);
             } else if (reqKind == Request::Kind::SetCourse) {
                 unset();
             } else {
@@ -121,22 +131,25 @@ class Shortlist {
         // Insertion into correct place
         double score = mealScore(model, meal);
         auto cursor = _active.begin_cursor();
+        SinglyLinkedNode<Meal> *mealNode =
+            new SinglyLinkedNode<Meal>{meal, nullptr};
+
         if (_active.isEmpty()) {
             _active.insertBefore(meal, cursor);
         } else {
             bool added = false;
             for (; !cursor.atEnd(); ++cursor) {
                 if (score < mealScore(model, *cursor)) {
-                    _active.insertBefore(meal, cursor);
+                    _active.attachBefore(cursor, mealNode);
                     added = true;
                     break;
                 }
             }
             if (!added) {
-                _active.insertBefore(meal, cursor);
+                _active.attachBefore(cursor, mealNode);
             }
-            _undo.push(Record{Request::Kind::AddMeal, meal});
         }
+        _undo.push(Record{Request::Kind::AddMeal, mealNode->data});
         return true;
     }
 
