@@ -172,9 +172,15 @@ class Shortlist {
     //    remove ALL of them. A call that changes nothing (`k <= 0`, or an empty
     //    shortlist) records NO undo entry.
     void removeLowest(int k, MenuModel const &model) {
-        // TODO
-        (void)k;
-        (void)model;
+        // DONE
+        if (k <= 0 || _active.isEmpty()) {
+            return;
+        }
+        SinglyLinkedList<Meal> mealsRemoved{};
+        for (int i = 0; i < k; ++k) {
+            mealsRemoved.attachBack(_active.detachFront());
+        }
+        _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved});
     }
 
     // 4. Process a queue of requests IN ARRIVAL ORDER, dispatching each by its
