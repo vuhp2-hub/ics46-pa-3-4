@@ -46,7 +46,26 @@ class Shortlist {
     // meals back), or a remove-lowest (put its removed meals back). Design a
     // record that covers all three, then make `_undo` a Stack of that.
 
-    Stack<int> _undo; // <-- replace `int` with your record type
+    class Record {
+      private:
+        Request req;
+        void unadd() {}
+        void unset() {}
+        void putBackKLowest() {}
+
+      public:
+        Record(const Request &req) : req(req) {}
+        void reverse() {
+            if (req.kind == Request::Kind::AddMeal) {
+                unadd();
+            } else if (req.kind == Request::Kind::SetCourse) {
+                unset();
+            } else {
+                putBackKLowest();
+            }
+        }
+    };
+    Stack<Record> _undo; // <-- replace `int` with your record type
 
     // TODO --- TRACK WHICH COURSES ARE SET
     // ---------------------------------------------------------------- You need
