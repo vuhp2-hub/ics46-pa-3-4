@@ -81,7 +81,7 @@ class Shortlist {
         int idx;
         int dish;
     };
-    SinglyLinkedList<SettedCourse> coursesSet;
+    SinglyLinkedList<SettedCourse> coursesSetted;
 
   public:
     Shortlist() = default;
@@ -90,7 +90,7 @@ class Shortlist {
     // plus any bookkeeping you
     //       allocated (only needed if it lives on the heap).
     ~Shortlist() {
-        // coursesSet should be freed with its own destructor
+        // coursesSetted should be freed with its own destructor
     }
 
     // ---- read-only view of the active shortlist (used by the driver +
@@ -105,13 +105,14 @@ class Shortlist {
         return _active.end();
     }
 
+    // DONE
     // 1. Add `meal` in score order, UNLESS it disagrees with a course already
     // fixed; return whether it was added.
     //    Walk a cursor to the spot, then attach the meal's node. Use
     //    mealScore(model, m) for a meal's score.
     bool addMeal(Meal const &meal, MenuModel const &model) {
         // First see if a fixed course disagrees
-        for (const SettedCourse &courseSet : coursesSet) {
+        for (const SettedCourse &courseSet : coursesSetted) {
             if (meal.dishFor(courseSet.idx) != courseSet.dish) {
                 return false;
             }
@@ -144,11 +145,26 @@ class Shortlist {
     //    MOVE out every meal that picks a different dish for `course` (keep
     //    them for undo), and return true.
     bool setCourse(int course, int dish, MenuModel const &model) {
-        // TODO
-        (void)course;
-        (void)dish;
-        (void)model;
-        return false;
+        // DONE
+
+        // Check if a course is already set
+        for (const SettedCourse &settedCourse : coursesSetted) {
+            if (settedCourse.idx == course) {
+                return false;
+            }
+        }
+        coursesSetted.append(SettedCourse{course, dish});
+        SinglyLinkedList<Meal> mealsRemoved{};
+
+        auto cursor = _active.begin_cursor();
+        for (; !cursor.atEnd(); ++cursor) {
+            if ((*cursor).dishFor(course) != dish) {
+                mealsRemoved.attachBack(_active.detachAt(cursor));
+            }
+        }
+        _undo.push(Record{Request::Kind::SetCourse, mealsRemoved});
+
+        return true;
     }
 
     // 3. MOVE the `k` lowest-scoring meals out (keep them for undo). If `k` is
