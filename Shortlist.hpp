@@ -186,9 +186,17 @@ class Shortlist {
     // 4. Process a queue of requests IN ARRIVAL ORDER, dispatching each by its
     // kind to the methods above.
     void applyRequests(Queue<Request> &requests, MenuModel const &model) {
-        // TODO
-        (void)requests;
-        (void)model;
+        // DONE
+
+        while (!requests.isEmpty()) {
+            Request req = requests.dequeue();
+            if (req.kind == Request::Kind::AddMeal)
+                addMeal(req.meal, model);
+            else if (req.kind == Request::Kind::SetCourse)
+                setCourse(req.course, req.dish, model);
+            else
+                removeLowest(req.k, model);
+        }
     }
 
     // 5. Undo the MOST RECENT successful request. Pop the top record and
