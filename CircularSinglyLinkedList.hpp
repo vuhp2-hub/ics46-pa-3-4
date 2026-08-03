@@ -168,20 +168,23 @@ template <typename T> class CircularSinglyLinkedList {
     // next = front). Empty case:
     //      it becomes the only node (n->next = n). Increment _length.
     void attachBack(SinglyLinkedNode<T> *n) {
-        if (!_length++) {
-            n->next = (_rear = n);
-        } else {
-            n->next = _rear->next;
+        if (_length++) {
             _rear = (_rear->next = n);
+        } else {
+            n->next = (_rear = n);
         }
     }
-    // TODO attachBefore(): splice the EXISTING node `n` in just before position
+    // DONE attachBefore(): splice the EXISTING node `n` in just before position
     // `c`. Cases: empty list
     //      (n is the only node); c at the end (== attach as the new rear);
     //      otherwise link it between c._prev and c._curr. Increment _length.
     void attachBefore(Cursor c, SinglyLinkedNode<T> *n) {
-        (void)c;
-        (void)n; /* TODO */
+        if (_length++) {
+            c._prev->next = n;
+            n->next = c._curr;
+        } else {
+            n->next = (_rear = n);
+        }
     }
 
     // ---- read-only forward iterator (count-bounded) ----
