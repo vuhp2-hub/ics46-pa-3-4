@@ -49,12 +49,14 @@ class Shortlist {
     class Record {
       private:
         Request req;
+        SinglyLinkedList<Meal> *set_aside;
         void unadd() {}
         void unset() {}
         void putBackKLowest() {}
 
       public:
-        Record(const Request &req) : req(req) {}
+        Record(const Request &req, SinglyLinkedList<Meal> *set_aside)
+            : req{req}, set_aside{set_aside} {}
         void reverse() {
             if (req.kind == Request::Kind::AddMeal) {
                 unadd();
