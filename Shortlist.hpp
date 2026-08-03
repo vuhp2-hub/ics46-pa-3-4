@@ -69,10 +69,16 @@ class Shortlist {
     };
     Stack<Record> _undo; // <-- replace `int` with your record type
 
-    // TODO --- TRACK WHICH COURSES ARE SET
+    // DONE --- TRACK WHICH COURSES ARE SET
     // ---------------------------------------------------------------- You need
     // to know, on each add, whether a course is fixed and to which dish. Add
     // whatever member(s) you want here (an array, a list, ...).
+
+    struct SettedCourse {
+        int idx;
+        int dish;
+    };
+    SinglyLinkedList<SettedCourse> *coursesSet = nullptr;
 
   public:
     Shortlist() = default;
