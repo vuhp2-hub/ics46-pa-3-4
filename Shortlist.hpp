@@ -55,6 +55,7 @@ class Shortlist {
         void putBackKLowest() {}
 
       public:
+        Record(const Request &req) : req{req} {}
         Record(const Request &req, SinglyLinkedList<Meal> &set_aside)
             : req{req}, set_aside{set_aside} {}
         void reverse() {
@@ -107,10 +108,28 @@ class Shortlist {
     //    Walk a cursor to the spot, then attach the meal's node. Use
     //    mealScore(model, m) for a meal's score.
     bool addMeal(Meal const &meal, MenuModel const &model) {
-        // TODO
-        (void)meal;
-        (void)model;
-        return false;
+        // First see if a fixed course disagrees
+        for (const SettedCourse &courseSet : coursesSet) {
+            if (meal.dishFor(courseSet.idx) != courseSet.dish) {
+                return false;
+            }
+        }
+
+        // Insertion into correct place
+        double score = mealScore(model, meal);
+        auto cursor = _active.begin_cursor();
+        if (_active.isEmpty()) {
+            _active.insertBefore(meal, cursor);
+        } else {
+            for (; !cursor.atEnd(); ++cursor) {
+                if (score < mealScore(model, *cursor)) {
+                    _active.insertBefore(meal, cursor);
+                    return true;
+                }
+            }
+            _active.insertBefore(meal, cursor);
+        }
+        return true;
     }
 
     // 2. Fix `course` to `dish`: if it is ALREADY set, do nothing and return
