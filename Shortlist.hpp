@@ -49,8 +49,9 @@ class Shortlist {
     class Record {
       private:
         Request::Kind reqKind;
-        SinglyLinkedList<Meal> set_aside;
+        CircularSinglyLinkedList<Meal> set_aside;
         const Meal *meal;
+        int num;
         void unadd(CircularSinglyLinkedList<Meal> &shortlist) {
             auto shortlist_cursor = shortlist.begin_cursor();
             for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
@@ -68,8 +69,9 @@ class Shortlist {
       public:
         Record(const Request::Kind reqKind, const Meal &meal)
             : reqKind(reqKind), meal(&meal) {}
-        Record(const Request::Kind reqKind, SinglyLinkedList<Meal> &set_aside)
-            : reqKind{reqKind}, set_aside{set_aside} {}
+        Record(const Request::Kind reqKind,
+               CircularSinglyLinkedList<Meal> &set_aside, int num)
+            : reqKind{reqKind}, set_aside{set_aside}, num{num} {}
         void reverse(CircularSinglyLinkedList<Meal> &shortlist) {
             if (reqKind == Request::Kind::AddMeal) {
                 unadd(shortlist);
@@ -167,7 +169,7 @@ class Shortlist {
             }
         }
         coursesSetted.append(SettedCourse{course, dish});
-        SinglyLinkedList<Meal> mealsRemoved{};
+        CircularSinglyLinkedList<Meal> mealsRemoved{};
 
         auto cursor = _active.begin_cursor();
         for (; !cursor.atEnd(); ++cursor) {
@@ -175,7 +177,7 @@ class Shortlist {
                 mealsRemoved.attachBack(_active.detachAt(cursor));
             }
         }
-        _undo.push(Record{Request::Kind::SetCourse, mealsRemoved});
+        _undo.push(Record{Request::Kind::SetCourse, mealsRemoved, course});
 
         return true;
     }
@@ -189,11 +191,11 @@ class Shortlist {
         if (k <= 0 || _active.isEmpty()) {
             return;
         }
-        SinglyLinkedList<Meal> mealsRemoved{};
+        CircularSinglyLinkedList<Meal> mealsRemoved{};
         for (int i = 0; i < k; ++k) {
             mealsRemoved.attachBack(_active.detachFront());
         }
-        _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved});
+        _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved, k});
     }
 
     // 4. Process a queue of requests IN ARRIVAL ORDER, dispatching each by its
