@@ -48,20 +48,22 @@ class Shortlist {
 
     class Record {
       private:
-        Request req;
+        Request::Kind reqKind;
         SinglyLinkedList<Meal> set_aside;
         void unadd() {}
         void unset() {}
         void putBackKLowest() {}
 
       public:
-        Record(const Request &req) : req{req} {}
-        Record(const Request &req, SinglyLinkedList<Meal> &set_aside)
-            : req{req}, set_aside{set_aside} {}
+        Record(const Request::Kind reqKind, Meal meal) {
+            set_aside.append(meal);
+        }
+        Record(const Request::Kind reqKind, SinglyLinkedList<Meal> &set_aside)
+            : reqKind{reqKind}, set_aside{set_aside} {}
         void reverse() {
-            if (req.kind == Request::Kind::AddMeal) {
+            if (reqKind == Request::Kind::AddMeal) {
                 unadd();
-            } else if (req.kind == Request::Kind::SetCourse) {
+            } else if (reqKind == Request::Kind::SetCourse) {
                 unset();
             } else {
                 putBackKLowest();
@@ -121,13 +123,18 @@ class Shortlist {
         if (_active.isEmpty()) {
             _active.insertBefore(meal, cursor);
         } else {
+            bool added = false;
             for (; !cursor.atEnd(); ++cursor) {
                 if (score < mealScore(model, *cursor)) {
                     _active.insertBefore(meal, cursor);
-                    return true;
+                    added = true;
+                    break;
                 }
             }
-            _active.insertBefore(meal, cursor);
+            if (!added) {
+                _active.insertBefore(meal, cursor);
+            }
+            _undo.push(Record{Request::Kind::AddMeal, meal});
         }
         return true;
     }
