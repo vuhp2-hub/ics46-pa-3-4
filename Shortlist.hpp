@@ -34,6 +34,12 @@
 #include "mealScore.hpp"
 
 class Shortlist {
+  public:
+    struct SettedCourse {
+        int idx;
+        int dish;
+    };
+
   private:
     CircularSinglyLinkedList<Meal>
         _active; // the active shortlist -- YOU order it
@@ -56,14 +62,38 @@ class Shortlist {
             auto shortlist_cursor = shortlist.begin_cursor();
             for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
                 if (*shortlist_cursor == *meal) {
-                    SinglyLinkedNode<Meal> *result =
-                        shortlist.detachAt(shortlist_cursor);
-                    delete result;
+                    delete shortlist.detachAt(shortlist_cursor);
+                    break;
                 }
             }
         }
 
-        void unset() {}
+        void unset(CircularSinglyLinkedList<Meal> &shortlist,
+                   const MenuModel &menu,
+                   SinglyLinkedList<SettedCourse> &coursesSetted) {
+            auto course_cursor = coursesSetted.begin_cursor();
+            for (; !course_cursor.atEnd(); ++course_cursor) {
+                if ((*course_cursor).idx == num) {
+                    delete coursesSetted.detachAt(course_cursor);
+                    break;
+                }
+            }
+
+            auto shortlist_cursor = shortlist.begin_cursor();
+            SinglyLinkedNode<Meal> *detachment = nullptr;
+            while (!set_aside.isEmpty()) {
+                if (detachment == nullptr) {
+                    detachment = shortlist.detachFront();
+                }
+                if (shortlist.isEmpty() ||
+                    mealScore(menu, *shortlist_cursor) >
+                        mealScore(menu, detachment->data)) {
+                    shortlist.attachBefore(shortlist_cursor, detachment);
+                    detachment = nullptr;
+                }
+                ++shortlist_cursor;
+            }
+        }
         void putBackKLowest() {}
 
       public:
@@ -72,11 +102,13 @@ class Shortlist {
         Record(const Request::Kind reqKind,
                CircularSinglyLinkedList<Meal> &set_aside, int num)
             : reqKind{reqKind}, set_aside{set_aside}, num{num} {}
-        void reverse(CircularSinglyLinkedList<Meal> &shortlist) {
+        void reverse(CircularSinglyLinkedList<Meal> &shortlist,
+                     const MenuModel &menu,
+                     SinglyLinkedList<SettedCourse> &coursesSetted) {
             if (reqKind == Request::Kind::AddMeal) {
                 unadd(shortlist);
             } else if (reqKind == Request::Kind::SetCourse) {
-                unset();
+                unset(shortlist, menu, coursesSetted);
             } else {
                 putBackKLowest();
             }
@@ -88,11 +120,6 @@ class Shortlist {
     // ---------------------------------------------------------------- You need
     // to know, on each add, whether a course is fixed and to which dish. Add
     // whatever member(s) you want here (an array, a list, ...).
-
-    struct SettedCourse {
-        int idx;
-        int dish;
-    };
     SinglyLinkedList<SettedCourse> coursesSetted;
 
   public:
