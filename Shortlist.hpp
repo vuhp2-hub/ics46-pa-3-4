@@ -109,11 +109,12 @@ class Shortlist {
         Record(const Request::Kind reqKind, const Meal &meal)
             : reqKind(reqKind), meal(&meal) {}
         Record(const Request::Kind reqKind,
-               CircularSinglyLinkedList<Meal> &set_aside)
-            : reqKind{reqKind}, set_aside{set_aside} {}
+               CircularSinglyLinkedList<Meal> &&set_aside)
+            : reqKind{reqKind}, set_aside{std::move(set_aside)} {}
         Record(const Request::Kind reqKind,
-               CircularSinglyLinkedList<Meal> &set_aside, int courseIdx)
-            : reqKind{reqKind}, set_aside{set_aside}, courseIdx{courseIdx} {}
+               CircularSinglyLinkedList<Meal> &&set_aside, int courseIdx)
+            : reqKind{reqKind}, set_aside{std::move(set_aside)},
+              courseIdx{courseIdx} {}
 
         ~Record() { meal = nullptr; }
 
@@ -221,7 +222,8 @@ class Shortlist {
                 ++cursor;
             }
         }
-        _undo.push(Record{Request::Kind::SetCourse, mealsRemoved, course});
+        _undo.push(
+            Record{Request::Kind::SetCourse, std::move(mealsRemoved), course});
 
         return true;
     }
@@ -239,7 +241,8 @@ class Shortlist {
         for (int i = 0; i < k; ++i) {
             mealsRemoved.attachBack(_active.detachFront());
         }
-        _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved});
+        _undo.push(
+            Record{Request::Kind::RemoveLowest, std::move(mealsRemoved)});
     }
 
     // 4. Process a queue of requests IN ARRIVAL ORDER, dispatching each by its
