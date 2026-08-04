@@ -99,5 +99,17 @@ int main(int argc, char **argv) {
         added += sl.addMeal(subset[i], model) ? 1 : 0;
     std::cout << "Added " << added << " of " << S << " meals.\n";
     printSorted("After adds", sl, model);
+
+    std::cout << "\nsetCourse(0, " << d0 << ") returned "
+              << ([&] {
+                     ics46::mealCopyCount = 0;
+                     bool r = sl.setCourse(0, d0, model);
+                     copies += ics46::mealCopyCount;
+                     return r;
+                 }()
+                      ? "true"
+                      : "false")
+              << "  (drops meals that pick a different dish for course 0)\n";
+    printSorted("After setCourse", sl, model);
     return 0;
 }

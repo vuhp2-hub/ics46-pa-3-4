@@ -99,7 +99,6 @@ int main(int argc, char **argv) {
         added += sl.addMeal(subset[i], model) ? 1 : 0;
     std::cout << "Added " << added << " of " << S << " meals.\n";
     printSorted("After adds", sl, model);
-    //
 
     std::cout << "\nsetCourse(0, " << d0 << ") returned "
               << ([&] {

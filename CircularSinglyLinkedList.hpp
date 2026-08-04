@@ -125,7 +125,12 @@ template <typename T> class CircularSinglyLinkedList {
     //      Empty case (the FIRST append): the new node is the only node --
     //      n->next = n (both front and rear).
     void append(T const &x) {
-        _rear = (_rear->next = new SinglyLinkedNode<T>{x, _rear->next});
+        if (_length) {
+            _rear = (_rear->next = new SinglyLinkedNode<T>{x, _rear->next});
+        } else {
+            _rear = new SinglyLinkedNode<T>{x, nullptr};
+            _rear->next = _rear;
+        }
         ++_length;
     }
     // DONE prepend(): add a new node holding x as the new FRONT (rear stays the
