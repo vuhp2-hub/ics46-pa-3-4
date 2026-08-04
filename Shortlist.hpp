@@ -260,8 +260,8 @@ class Shortlist {
     //    undo history, do nothing. How much work your undo does is graded (see
     //    the instructions) -- what a record remembers is your design.
     void undoLast(MenuModel const &model) {
-        // TODO
-        (void)model;
+        // DONE
+        _undo.pop().reverse(_active, model, coursesSetted);
     }
 
     // 6. THE FINALE (once the shortlist is set in stone): the caller features
