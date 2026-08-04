@@ -32,7 +32,6 @@
 #include "SinglyLinkedNode.hpp"
 #include "Stack.hpp"
 #include "mealScore.hpp"
-#include <iostream>
 
 class Shortlist {
   public:
@@ -98,9 +97,8 @@ class Shortlist {
             }
         }
         void putBackKLowest(CircularSinglyLinkedList<Meal> &shortlist) {
-            auto shortlist_cursor = shortlist.begin_cursor();
             while (!set_aside.isEmpty()) {
-                shortlist.attachBefore(shortlist_cursor,
+                shortlist.attachBefore(shortlist.begin_cursor(),
                                        set_aside.detachFront());
             }
         }

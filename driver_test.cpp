@@ -118,5 +118,11 @@ int main(int argc, char **argv) {
     copies += ics46::mealCopyCount;
     printSorted("After removeLowest", sl, model);
 
+    // Undo one request at a time -- LIFO, and each kind reverses differently.
+    ics46::mealCopyCount = 0;
+    sl.undoLast(model);
+    copies += ics46::mealCopyCount; // reverses the remove-lowest
+    printSorted("After undo #1 (reverses remove-lowest)", sl, model);
+
     return 0;
 }
