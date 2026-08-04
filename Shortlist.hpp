@@ -139,6 +139,10 @@ class Shortlist {
               meal{nullptr}, courseIdx{courseIdx} {}
 
         ~Record() = default;
+        void discard() {
+            delete set_aside;
+            set_aside = nullptr;
+        }
         void reverse(CircularSinglyLinkedList<Meal> &shortlist,
                      const MenuModel &menu,
                      SinglyLinkedList<SettedCourse> &coursesSetted) {
@@ -146,12 +150,10 @@ class Shortlist {
                 unadd(shortlist);
             } else if (reqKind == Request::Kind::SetCourse) {
                 unset(shortlist, menu, coursesSetted);
-                delete set_aside;
-                set_aside = nullptr;
+                discard();
             } else {
                 putBackKLowest(shortlist);
-                delete set_aside;
-                set_aside = nullptr;
+                discard();
             }
         }
     };
@@ -171,6 +173,9 @@ class Shortlist {
     //       allocated (only needed if it lives on the heap).
     ~Shortlist() {
         // coursesSetted should be freed with its own destructor
+        while (!_undo.isEmpty()) {
+            _undo.pop().discard();
+        }
     }
 
     // ---- read-only view of the active shortlist (used by the driver +

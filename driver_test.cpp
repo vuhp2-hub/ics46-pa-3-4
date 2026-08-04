@@ -152,5 +152,30 @@ int main(int argc, char **argv) {
             sl, model);
     }
 
+    // The same kinds of change, this time delivered as a QUEUE of requests:
+    // applyRequests must dequeue them in arrival order and dispatch each by its
+    // kind. The undo depth counts one record per SUCCESSFUL request. It runs on
+    // its own shortlist, and outside the copy tally, because adding a meal
+    // copies it BY DESIGN -- the tally below is only about the transfers
+    // (setCourse / removeLowest / undo).
+    Shortlist queued;
+    Queue<Request> requests;
+    for (int i = 0; i < S; ++i)
+        requests.enqueue({Request::AddMeal, 0, 0, 0, subset[i]});
+    requests.enqueue({Request::SetCourse, 0, d0, 0, Meal{}});
+    requests.enqueue({Request::RemoveLowest, 0, 0, 1, Meal{}});
+    queued.applyRequests(requests, model);
+    std::cout << "\napplyRequests(" << S << " adds, setCourse(0, " << d0
+              << "), removeLowest(1)):"
+              << "   undo depth " << queued.undoDepth() << "\n";
+    printSorted("After applyRequests", queued, model);
+
+    // Self-check for the graded move-not-copy rule: relinking a node copies no
+    // Meal, so this must be 0. (Only setCourse / removeLowest / undo are
+    // counted. addMeal copies a meal by design; the featuring lap's copies are
+    // this driver's own collecting -- featuredMeal itself hands back a
+    // reference.)
+    std::cout << "\nmeals copied during setCourse/removeLowest/undo: " << copies
+              << "   (0 = you moved nodes, as intended)\n";
     return 0;
 }
