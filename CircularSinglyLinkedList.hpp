@@ -160,12 +160,41 @@ template <typename T> class CircularSinglyLinkedList {
     //      nullptr, and RETURN it. (Mirror the plain list's detachAt, kept
     //      ring-correct.)
     SinglyLinkedNode<T> *detachAt(Cursor &c) {
-        SinglyLinkedNode<T> *current{c._curr};
-        c._prev->next = current->next;
+        if (_length == 0 || c._curr == nullptr) {
+            return nullptr;
+        }
+
+        SinglyLinkedNode<T> *detached = c._curr;
+
+        if (_length == 1) {
+            // The only node points to itself.
+            _rear = nullptr;
+            _length = 0;
+
+            c._curr = nullptr;
+            c._prev = nullptr;
+
+            detached->next = nullptr;
+            return detached;
+        }
+
+        SinglyLinkedNode<T> *next = detached->next;
+
+        c._prev->next = next;
+
+        if (detached == _rear) {
+            _rear = c._prev;
+        }
+
         --_length;
-        return current;
+        c._curr = next;
+        detached->next = nullptr;
+        return detached;
     }
     SinglyLinkedNode<T> *detachFront() {
+        if (_length == 0) {
+            return nullptr;
+        }
         Cursor c = begin_cursor();
         return detachAt(c);
     }

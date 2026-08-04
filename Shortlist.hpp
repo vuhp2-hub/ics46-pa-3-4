@@ -214,9 +214,11 @@ class Shortlist {
         CircularSinglyLinkedList<Meal> mealsRemoved{};
 
         auto cursor = _active.begin_cursor();
-        for (; !cursor.atEnd(); ++cursor) {
+        while (!cursor.atEnd()) {
             if ((*cursor).dishFor(course) != dish) {
                 mealsRemoved.attachBack(_active.detachAt(cursor));
+            } else {
+                ++cursor;
             }
         }
         _undo.push(Record{Request::Kind::SetCourse, mealsRemoved, course});

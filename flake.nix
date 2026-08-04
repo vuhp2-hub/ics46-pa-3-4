@@ -13,7 +13,7 @@
 
           nativeBuildInputs = [ pkgs.libgcc ];
 
-          buildPhase = "g++ -std=c++20 -O2 -Wall -Wextra -g  -fsanitize=address,undefined driver_test.cpp -o pa3-4test";
+          buildPhase = "g++ -std=c++20 -O2 -Wall -Wextra  -fsanitize=address,undefined -g driver_test.cpp -o pa3-4test";
           installPhase = ''
             mkdir -p $out/bin
             cp pa3-4test $out/bin
