@@ -107,9 +107,11 @@ template <typename T> class CircularSinglyLinkedList {
     // DONE: the front is _rear->next; the back is _rear. (Both O(1). Assume the
     // list is non-empty.)
     T const &front() const {
-        return _rear->next;
+        return _rear->next->data;
     } // <-- replace with the ring's front
-    T const &back() const { return _rear; } // <-- replace with the ring's back
+    T const &back() const {
+        return _rear->data;
+    } // <-- replace with the ring's back
 
     // DONE rotate(): advance the ring one hop -- the old front becomes the new
     // rear -- in O(1), by moving
