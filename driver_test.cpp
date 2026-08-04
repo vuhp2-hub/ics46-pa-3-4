@@ -128,5 +128,18 @@ int main(int argc, char **argv) {
     copies += ics46::mealCopyCount; // reverses the set-course
     printSorted("After undo #2 (reverses set-course)", sl, model);
 
+    // The shortlist is back to its full set, so featuring actually has meals to
+    // walk. Feature them one at a time: read the meal in the spotlight, then
+    // rotate to the next. A lap of size() turns must visit every meal exactly
+    // once, whichever end of the ring your rotation exposes. (featuredMeal()
+    // returns a reference and copies nothing; the copy below is the driver's
+    // own, to collect them for printing.)
+    SinglyLinkedList<Meal> featured;
+    for (int i = 0, laps = sl.size(); i < laps; ++i) {
+        featured.append(sl.featuredMeal());
+        sl.rotate();
+    }
+    printSorted("featured meals (one lap)", featured, model);
+
     return 0;
 }

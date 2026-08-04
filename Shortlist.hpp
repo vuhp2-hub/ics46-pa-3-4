@@ -298,10 +298,9 @@ class Shortlist {
     //    REFERENCE -- featuredMeal() must not copy the meal. Like the ring's
     //    front()/back(), it may assume the shortlist is not empty.
     Meal const &featuredMeal() const {
-        static Meal _stub{};
-        return _stub;
-    } // <-- TODO: the featured meal
-    void rotate() { /* TODO: advance the ring one hop */ }
+        return _active.back();
+    } // <-- DONE: the featured meal
+    void rotate() { /* DONE: advance the ring one hop */ _active.rotate(); }
 };
 
 #endif // SHORTLIST_HPP
