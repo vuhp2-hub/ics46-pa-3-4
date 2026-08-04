@@ -32,6 +32,7 @@
 #include "SinglyLinkedNode.hpp"
 #include "Stack.hpp"
 #include "mealScore.hpp"
+#include <iostream>
 
 class Shortlist {
   public:
@@ -63,6 +64,7 @@ class Shortlist {
             for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
                 if (*shortlist_cursor == *meal) {
                     delete shortlist.detachAt(shortlist_cursor);
+                    meal = nullptr;
                     break;
                 }
             }
@@ -112,6 +114,9 @@ class Shortlist {
         Record(const Request::Kind reqKind,
                CircularSinglyLinkedList<Meal> &set_aside, int courseIdx)
             : reqKind{reqKind}, set_aside{set_aside}, courseIdx{courseIdx} {}
+
+        ~Record() { meal = nullptr; }
+
         void reverse(CircularSinglyLinkedList<Meal> &shortlist,
                      const MenuModel &menu,
                      SinglyLinkedList<SettedCourse> &coursesSetted) {
@@ -174,7 +179,7 @@ class Shortlist {
             new SinglyLinkedNode<Meal>{meal, nullptr};
 
         if (_active.isEmpty()) {
-            _active.insertBefore(meal, cursor);
+            _active.attachBefore(cursor, mealNode);
         } else {
             bool added = false;
             for (; !cursor.atEnd(); ++cursor) {
