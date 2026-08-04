@@ -123,6 +123,10 @@ int main(int argc, char **argv) {
     sl.undoLast(model);
     copies += ics46::mealCopyCount; // reverses the remove-lowest
     printSorted("After undo #1 (reverses remove-lowest)", sl, model);
+    ics46::mealCopyCount = 0;
+    sl.undoLast(model);
+    copies += ics46::mealCopyCount; // reverses the set-course
+    printSorted("After undo #2 (reverses set-course)", sl, model);
 
     return 0;
 }

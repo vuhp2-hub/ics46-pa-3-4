@@ -32,6 +32,7 @@
 #include "SinglyLinkedNode.hpp"
 #include "Stack.hpp"
 #include "mealScore.hpp"
+#include <iostream>
 
 class Shortlist {
   public:
@@ -80,19 +81,36 @@ class Shortlist {
                 }
             }
 
-            auto shortlist_cursor = shortlist.begin_cursor();
             SinglyLinkedNode<Meal> *detachment = nullptr;
+
+            // Likely to be segfaulty if empty shortlist.
+            auto cursor = shortlist.begin_cursor();
             while (!set_aside.isEmpty()) {
                 if (detachment == nullptr) {
-                    detachment = shortlist.detachFront();
+                    detachment = set_aside.detachFront();
                 }
-                if (shortlist.isEmpty() ||
-                    mealScore(menu, *shortlist_cursor) >
-                        mealScore(menu, detachment->data)) {
-                    shortlist.attachBefore(shortlist_cursor, detachment);
+
+                if (shortlist.isEmpty()) {
+                    shortlist.attachBefore(shortlist.begin_cursor(),
+                                           detachment);
                     detachment = nullptr;
                 } else {
-                    ++shortlist_cursor;
+                    if (shortlist.size() == 1) {
+                        cursor = shortlist.begin_cursor();
+                    }
+                    if (mealScore(menu, *cursor) >
+                        mealScore(menu, detachment->data)) {
+                        shortlist.attachBefore(shortlist.begin_cursor(),
+                                               detachment);
+                        detachment = nullptr;
+                    } else {
+                        if (cursor.atEnd()) {
+                            shortlist.attachBefore(shortlist.end_cursor(),
+                                                   detachment);
+                            detachment = nullptr;
+                        }
+                        ++cursor;
+                    }
                 }
             }
         }
