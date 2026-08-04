@@ -90,11 +90,18 @@ class Shortlist {
                         mealScore(menu, detachment->data)) {
                     shortlist.attachBefore(shortlist_cursor, detachment);
                     detachment = nullptr;
+                } else {
+                    ++shortlist_cursor;
                 }
-                ++shortlist_cursor;
             }
         }
-        void putBackKLowest() {}
+        void putBackKLowest(CircularSinglyLinkedList<Meal> &shortlist) {
+            auto shortlist_cursor = shortlist.begin_cursor();
+            while (!set_aside.isEmpty()) {
+                shortlist.attachBefore(shortlist_cursor,
+                                       set_aside.detachFront());
+            }
+        }
 
       public:
         Record(const Request::Kind reqKind, const Meal &meal)
@@ -110,7 +117,7 @@ class Shortlist {
             } else if (reqKind == Request::Kind::SetCourse) {
                 unset(shortlist, menu, coursesSetted);
             } else {
-                putBackKLowest();
+                putBackKLowest(shortlist);
             }
         }
     };
