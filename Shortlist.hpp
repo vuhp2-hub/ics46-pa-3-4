@@ -32,7 +32,6 @@
 #include "SinglyLinkedNode.hpp"
 #include "Stack.hpp"
 #include "mealScore.hpp"
-#include <iostream>
 
 class Shortlist {
   public:
@@ -57,14 +56,56 @@ class Shortlist {
       private:
         Request::Kind reqKind;
         CircularSinglyLinkedList<Meal> *set_aside;
-        SinglyLinkedNode<Meal> *meal;
+        int *set_asideRefs;
+        Meal *meal;
+        int *mealRefs;
         int courseIdx;
+        void retain() {
+            if (set_asideRefs != nullptr) {
+                ++*set_asideRefs;
+            }
+            if (mealRefs != nullptr) {
+                ++*mealRefs;
+            }
+        }
+        void releaseSetAside() {
+            if (set_asideRefs != nullptr && --*set_asideRefs == 0) {
+                delete set_aside;
+                delete set_asideRefs;
+            }
+            set_aside = nullptr;
+            set_asideRefs = nullptr;
+        }
+        void releaseMeal() {
+            if (mealRefs != nullptr && --*mealRefs == 0) {
+                delete meal;
+                delete mealRefs;
+            }
+            meal = nullptr;
+            mealRefs = nullptr;
+        }
+
+        static void attachByScore(CircularSinglyLinkedList<Meal> &shortlist,
+                                  SinglyLinkedNode<Meal> *node,
+                                  const MenuModel &menu) {
+            if (node == nullptr) {
+                return;
+            }
+
+            double nodeScore = mealScore(menu, node->data);
+            auto cursor = shortlist.begin_cursor();
+            while (!cursor.atEnd() &&
+                   mealScore(menu, *cursor) <= nodeScore) {
+                ++cursor;
+            }
+            shortlist.attachBefore(cursor, node);
+        }
+
         void unadd(CircularSinglyLinkedList<Meal> &shortlist) {
             auto shortlist_cursor = shortlist.begin_cursor();
             for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
-                if (*shortlist_cursor == meal->data) {
+                if (meal != nullptr && *shortlist_cursor == *meal) {
                     delete shortlist.detachAt(shortlist_cursor);
-                    meal = nullptr;
                     break;
                 }
             }
@@ -81,78 +122,74 @@ class Shortlist {
                 }
             }
 
-            SinglyLinkedNode<Meal> *detachment = nullptr;
-
-            // Likely to be segfaulty if empty shortlist.
-            auto cursor = shortlist.begin_cursor();
             while (!set_aside->isEmpty()) {
-                if (detachment == nullptr) {
-                    detachment = set_aside->detachFront();
-                }
-
-                if (shortlist.isEmpty()) {
-                    shortlist.attachBefore(shortlist.begin_cursor(),
-                                           detachment);
-                    detachment = nullptr;
-                } else {
-                    if (shortlist.size() == 1) {
-                        cursor = shortlist.begin_cursor();
-                    }
-                    if (mealScore(menu, *cursor) >
-                        mealScore(menu, detachment->data)) {
-                        shortlist.attachBefore(shortlist.begin_cursor(),
-                                               detachment);
-                        detachment = nullptr;
-                    } else {
-                        if (cursor.atEnd()) {
-                            shortlist.attachBefore(shortlist.end_cursor(),
-                                                   detachment);
-                            detachment = nullptr;
-                        }
-                        ++cursor;
-                    }
-                }
+                attachByScore(shortlist, set_aside->detachFront(), menu);
             }
         }
-        void putBackKLowest(CircularSinglyLinkedList<Meal> &shortlist) {
+        void putBackKLowest(CircularSinglyLinkedList<Meal> &shortlist,
+                            const MenuModel &menu) {
             while (!set_aside->isEmpty()) {
-                shortlist.attachBefore(shortlist.begin_cursor(),
-                                       set_aside->detachFront());
+                attachByScore(shortlist, set_aside->detachFront(), menu);
             }
         }
 
       public:
         Record(const Request::Kind reqKind, SinglyLinkedNode<Meal> *meal)
-            : reqKind{reqKind}, set_aside{nullptr}, meal{meal},
-              courseIdx{-1} {}
+            : reqKind{reqKind}, set_aside{nullptr}, set_asideRefs{nullptr},
+              meal{new Meal{meal->data}}, mealRefs{new int{1}}, courseIdx{-1} {}
         Record(const Request::Kind reqKind,
                CircularSinglyLinkedList<Meal> &&set_aside)
-            : reqKind{reqKind},
-              set_aside{new CircularSinglyLinkedList<Meal>{
-                  std::move(set_aside)}},
-              meal{nullptr}, courseIdx{-1} {}
+            : reqKind{reqKind}, set_aside{new CircularSinglyLinkedList<Meal>{
+                                    std::move(set_aside)}},
+              set_asideRefs{new int{1}}, meal{nullptr}, mealRefs{nullptr},
+              courseIdx{-1} {}
         Record(const Request::Kind reqKind,
                CircularSinglyLinkedList<Meal> &&set_aside, int courseIdx)
-            : reqKind{reqKind},
-              set_aside{new CircularSinglyLinkedList<Meal>{
-                  std::move(set_aside)}},
-              meal{nullptr}, courseIdx{courseIdx} {}
+            : reqKind{reqKind}, set_aside{new CircularSinglyLinkedList<Meal>{
+                                    std::move(set_aside)}},
+              set_asideRefs{new int{1}}, meal{nullptr}, mealRefs{nullptr},
+              courseIdx{courseIdx} {}
 
-        ~Record() = default;
-        void discard() {
-            delete set_aside;
-            set_aside = nullptr;
+        Record(Record const &other)
+            : reqKind{other.reqKind}, set_aside{other.set_aside},
+              set_asideRefs{other.set_asideRefs}, meal{other.meal},
+              mealRefs{other.mealRefs}, courseIdx{other.courseIdx} {
+            retain();
         }
+        friend void swap(Record &a, Record &b) noexcept {
+            std::swap(a.reqKind, b.reqKind);
+            std::swap(a.set_aside, b.set_aside);
+            std::swap(a.set_asideRefs, b.set_asideRefs);
+            std::swap(a.meal, b.meal);
+            std::swap(a.mealRefs, b.mealRefs);
+            std::swap(a.courseIdx, b.courseIdx);
+        }
+        Record(Record &&other) noexcept
+            : reqKind{Request::Kind::AddMeal}, set_aside{nullptr},
+              set_asideRefs{nullptr}, meal{nullptr}, mealRefs{nullptr},
+              courseIdx{-1} {
+            swap(*this, other);
+        }
+        Record &operator=(Record other) {
+            swap(*this, other);
+            return *this;
+        }
+        ~Record() {
+            releaseSetAside();
+            releaseMeal();
+        }
+        void discard() { releaseSetAside(); }
         void reverse(CircularSinglyLinkedList<Meal> &shortlist,
                      const MenuModel &menu,
                      SinglyLinkedList<SettedCourse> &coursesSetted) {
             if (reqKind == Request::Kind::AddMeal) {
                 unadd(shortlist);
+                releaseMeal();
             } else if (reqKind == Request::Kind::SetCourse) {
                 unset(shortlist, menu, coursesSetted);
                 discard();
             } else {
-                putBackKLowest(shortlist);
+                putBackKLowest(shortlist, menu);
                 discard();
             }
         }
@@ -234,6 +271,7 @@ class Shortlist {
     //    them for undo), and return true.
     bool setCourse(int course, int dish, MenuModel const &model) {
         // DONE
+        (void)model;
 
         // Check if a course is already set
         for (const SettedCourse &settedCourse : coursesSetted) {
@@ -264,11 +302,12 @@ class Shortlist {
     //    shortlist) records NO undo entry.
     void removeLowest(int k, MenuModel const &model) {
         // DONE
+        (void)model;
         if (k <= 0 || _active.isEmpty()) {
             return;
         }
         CircularSinglyLinkedList<Meal> mealsRemoved{};
-        for (int i = 0; i < k; ++i) {
+        for (int i = 0; i < k && !_active.isEmpty(); ++i) {
             mealsRemoved.attachBack(_active.detachFront());
         }
         _undo.push(
@@ -301,6 +340,9 @@ class Shortlist {
     //    the instructions) -- what a record remembers is your design.
     void undoLast(MenuModel const &model) {
         // DONE
+        if (_undo.isEmpty()) {
+            return;
+        }
         _undo.pop().reverse(_active, model, coursesSetted);
     }
 
