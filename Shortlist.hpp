@@ -128,9 +128,8 @@ class Shortlist {
         }
         void putBackKLowest(CircularSinglyLinkedList<Meal> &shortlist,
                             const MenuModel &menu) {
-            while (!set_aside->isEmpty()) {
-                attachByScore(shortlist, set_aside->detachFront(), menu);
-            }
+            (void)menu;
+            shortlist.attachFront(*set_aside);
         }
 
       public:

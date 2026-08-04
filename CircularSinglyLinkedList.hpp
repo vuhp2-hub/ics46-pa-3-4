@@ -238,6 +238,24 @@ template <typename T> class CircularSinglyLinkedList {
         }
     }
 
+    void attachFront(CircularSinglyLinkedList &other) {
+        if (other._length == 0) {
+            return;
+        }
+        if (_length == 0) {
+            swap(other);
+            return;
+        }
+
+        SinglyLinkedNode<T> *front = _rear->next;
+        SinglyLinkedNode<T> *otherFront = other._rear->next;
+        _rear->next = otherFront;
+        other._rear->next = front;
+        _length += other._length;
+        other._rear = nullptr;
+        other._length = 0;
+    }
+
     // ---- read-only forward iterator (count-bounded) ----
     class Iterator {
       private:
