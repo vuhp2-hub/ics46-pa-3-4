@@ -56,13 +56,13 @@ class Shortlist {
     class Record {
       private:
         Request::Kind reqKind;
-        CircularSinglyLinkedList<Meal> set_aside;
-        const Meal *meal;
+        CircularSinglyLinkedList<Meal> *set_aside;
+        SinglyLinkedNode<Meal> *meal;
         int courseIdx;
         void unadd(CircularSinglyLinkedList<Meal> &shortlist) {
             auto shortlist_cursor = shortlist.begin_cursor();
             for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
-                if (*shortlist_cursor == *meal) {
+                if (*shortlist_cursor == meal->data) {
                     delete shortlist.detachAt(shortlist_cursor);
                     meal = nullptr;
                     break;
@@ -85,9 +85,9 @@ class Shortlist {
 
             // Likely to be segfaulty if empty shortlist.
             auto cursor = shortlist.begin_cursor();
-            while (!set_aside.isEmpty()) {
+            while (!set_aside->isEmpty()) {
                 if (detachment == nullptr) {
-                    detachment = set_aside.detachFront();
+                    detachment = set_aside->detachFront();
                 }
 
                 if (shortlist.isEmpty()) {
@@ -115,25 +115,30 @@ class Shortlist {
             }
         }
         void putBackKLowest(CircularSinglyLinkedList<Meal> &shortlist) {
-            while (!set_aside.isEmpty()) {
+            while (!set_aside->isEmpty()) {
                 shortlist.attachBefore(shortlist.begin_cursor(),
-                                       set_aside.detachFront());
+                                       set_aside->detachFront());
             }
         }
 
       public:
-        Record(const Request::Kind reqKind, const Meal &meal)
-            : reqKind(reqKind), meal(&meal) {}
+        Record(const Request::Kind reqKind, SinglyLinkedNode<Meal> *meal)
+            : reqKind{reqKind}, set_aside{nullptr}, meal{meal},
+              courseIdx{-1} {}
         Record(const Request::Kind reqKind,
                CircularSinglyLinkedList<Meal> &&set_aside)
-            : reqKind{reqKind}, set_aside{std::move(set_aside)} {}
+            : reqKind{reqKind},
+              set_aside{new CircularSinglyLinkedList<Meal>{
+                  std::move(set_aside)}},
+              meal{nullptr}, courseIdx{-1} {}
         Record(const Request::Kind reqKind,
                CircularSinglyLinkedList<Meal> &&set_aside, int courseIdx)
-            : reqKind{reqKind}, set_aside{std::move(set_aside)},
-              courseIdx{courseIdx} {}
+            : reqKind{reqKind},
+              set_aside{new CircularSinglyLinkedList<Meal>{
+                  std::move(set_aside)}},
+              meal{nullptr}, courseIdx{courseIdx} {}
 
-        ~Record() { meal = nullptr; }
-
+        ~Record() = default;
         void reverse(CircularSinglyLinkedList<Meal> &shortlist,
                      const MenuModel &menu,
                      SinglyLinkedList<SettedCourse> &coursesSetted) {
@@ -141,8 +146,12 @@ class Shortlist {
                 unadd(shortlist);
             } else if (reqKind == Request::Kind::SetCourse) {
                 unset(shortlist, menu, coursesSetted);
+                delete set_aside;
+                set_aside = nullptr;
             } else {
                 putBackKLowest(shortlist);
+                delete set_aside;
+                set_aside = nullptr;
             }
         }
     };
@@ -210,7 +219,7 @@ class Shortlist {
                 _active.attachBefore(cursor, mealNode);
             }
         }
-        _undo.push(Record{Request::Kind::AddMeal, mealNode->data});
+        _undo.push(Record{Request::Kind::AddMeal, mealNode});
         return true;
     }
 

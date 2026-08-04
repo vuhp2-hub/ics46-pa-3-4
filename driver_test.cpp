@@ -141,5 +141,16 @@ int main(int argc, char **argv) {
     }
     printSorted("featured meals (one lap)", featured, model);
 
+    // Undoing an ADD destroys that meal (there is no redo), so the shortlist
+    // shrinks by one.
+    if (sl.undoDepth() > 0) {
+        ics46::mealCopyCount = 0;
+        sl.undoLast(model);
+        copies += ics46::mealCopyCount;
+        printSorted(
+            "After undo #3 (reverses an add-meal -- that meal is destroyed)",
+            sl, model);
+    }
+
     return 0;
 }
