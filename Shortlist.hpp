@@ -57,7 +57,7 @@ class Shortlist {
         Request::Kind reqKind;
         CircularSinglyLinkedList<Meal> set_aside;
         const Meal *meal;
-        int num;
+        int courseIdx;
         void unadd(CircularSinglyLinkedList<Meal> &shortlist) {
             auto shortlist_cursor = shortlist.begin_cursor();
             for (; !shortlist_cursor.atEnd(); ++shortlist_cursor) {
@@ -73,7 +73,7 @@ class Shortlist {
                    SinglyLinkedList<SettedCourse> &coursesSetted) {
             auto course_cursor = coursesSetted.begin_cursor();
             for (; !course_cursor.atEnd(); ++course_cursor) {
-                if ((*course_cursor).idx == num) {
+                if ((*course_cursor).idx == courseIdx) {
                     delete coursesSetted.detachAt(course_cursor);
                     break;
                 }
@@ -107,8 +107,11 @@ class Shortlist {
         Record(const Request::Kind reqKind, const Meal &meal)
             : reqKind(reqKind), meal(&meal) {}
         Record(const Request::Kind reqKind,
-               CircularSinglyLinkedList<Meal> &set_aside, int num)
-            : reqKind{reqKind}, set_aside{set_aside}, num{num} {}
+               CircularSinglyLinkedList<Meal> &set_aside)
+            : reqKind{reqKind}, set_aside{set_aside} {}
+        Record(const Request::Kind reqKind,
+               CircularSinglyLinkedList<Meal> &set_aside, int courseIdx)
+            : reqKind{reqKind}, set_aside{set_aside}, courseIdx{courseIdx} {}
         void reverse(CircularSinglyLinkedList<Meal> &shortlist,
                      const MenuModel &menu,
                      SinglyLinkedList<SettedCourse> &coursesSetted) {
@@ -229,7 +232,7 @@ class Shortlist {
         for (int i = 0; i < k; ++k) {
             mealsRemoved.attachBack(_active.detachFront());
         }
-        _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved, k});
+        _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved});
     }
 
     // 4. Process a queue of requests IN ARRIVAL ORDER, dispatching each by its
