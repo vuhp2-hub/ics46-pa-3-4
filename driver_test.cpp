@@ -111,5 +111,12 @@ int main(int argc, char **argv) {
                       : "false")
               << "  (drops meals that pick a different dish for course 0)\n";
     printSorted("After setCourse", sl, model);
+
+    std::cout << "\nremoveLowest(" << (S / 3 > 0 ? S / 3 : 1) << "):\n";
+    ics46::mealCopyCount = 0;
+    sl.removeLowest((S / 3 > 0 ? S / 3 : 1), model);
+    copies += ics46::mealCopyCount;
+    printSorted("After removeLowest", sl, model);
+
     return 0;
 }

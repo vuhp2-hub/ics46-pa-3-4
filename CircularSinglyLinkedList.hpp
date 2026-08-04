@@ -167,7 +167,6 @@ template <typename T> class CircularSinglyLinkedList {
     }
     SinglyLinkedNode<T> *detachFront() {
         Cursor c = begin_cursor();
-        --_length;
         return detachAt(c);
     }
 

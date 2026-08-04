@@ -234,7 +234,7 @@ class Shortlist {
             return;
         }
         CircularSinglyLinkedList<Meal> mealsRemoved{};
-        for (int i = 0; i < k; ++k) {
+        for (int i = 0; i < k; ++i) {
             mealsRemoved.attachBack(_active.detachFront());
         }
         _undo.push(Record{Request::Kind::RemoveLowest, mealsRemoved});
